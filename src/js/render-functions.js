@@ -1,15 +1,16 @@
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
-
-const gallery = document.querySelector('.gallery');
+const galleryElement = document.querySelector('.gallery');
 const loader = document.querySelector('.loader');
-let lightbox = null;
+const fetchPostsBtn = document.querySelector('#load-btn');
 
-function createGallery(images) {
-  gallery.innerHTML = images
+let lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+
+export async function createGallery(images) {
+  const markup = images
     .map(
       ({
         webformatURL,
@@ -19,48 +20,47 @@ function createGallery(images) {
         views,
         comments,
         downloads,
-      }) =>
-        ` <li class="gallery-card">
+      }) => {
+        return `
+      <li class="gallery-item">
         <a class="gallery-link" href="${largeImageURL}">
-              <img src="${webformatURL}" alt="${tags}" class="gallery-icon" />
-              </a>
-              <ul class="icon-info">
-               <li>Likes<p>${likes}</p></li>
-            <li>Views<p>${views}</p></li>
-            <li>Comments<p>${comments}</p></li>
-            <li>Downloads<p>${downloads}</p></li>
-            </ul>
-          </li>`
+          <img class="gallery-image" src="${webformatURL}" alt="${tags}" />
+        </a>
+        <div class="info">
+          <p class="info-item"><b>Likes</b> ${likes}</p>
+          <p class="info-item"><b>Views</b> ${views}</p>
+          <p class="info-item"><b>Comments</b> ${comments}</p>
+          <p class="info-item"><b>Downloads</b> ${downloads}</p>
+        </div>
+      </li>`;
+      }
     )
     .join('');
-  if (!lightbox) {
-    lightbox = new SimpleLightbox('.gallery-link', {
-      captionDelay: 250,
-      showCounter: false,
-      captionsData: 'alt',
-    });
-  } else {
-    lightbox.refresh();
+
+  galleryElement.insertAdjacentHTML('beforeend', markup);
+  lightbox.refresh();
+}
+
+export function clearGallery() {
+  galleryElement.innerHTML = '';
+}
+
+export function showLoader() {
+  if (loader) {
+    loader.classList.add('is-open');
   }
 }
 
-function clearGallery() {
-  gallery.innerHTML = '';
+export function hideLoader() {
+  if (loader) {
+    loader.classList.remove('is-open');
+  }
 }
 
-function showLoader() {
-  loader.classList.add('hiden');
+export function showLoadMoreButton() {
+  fetchPostsBtn.classList.add('is-open');
 }
 
-function hideLoader() {
-  loader.classList.remove('hiden');
+export function hideLoadMoreButton() {
+  fetchPostsBtn.classList.remove('is-open');
 }
-export const errorMessage = msg => {
-  iziToast.error({
-    title: 'Error',
-    position: 'topRight',
-    message: msg,
-  });
-};
-
-export { createGallery, clearGallery, showLoader, hideLoader };
